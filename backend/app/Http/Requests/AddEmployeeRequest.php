@@ -27,7 +27,7 @@ class AddEmployeeRequest extends FormRequest
             'company_id' => 'required|string',
             'firstname' => 'string|required|max:500',
             'lastname' => 'string|required|max:500',
-            'email' => 'string|required|email|unique:employees,email',
+            'email' => 'required|email|unique:employees,email',
         ];
     }
 }
