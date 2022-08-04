@@ -3,19 +3,18 @@
     <div class="vue-modal-inner">
       <div class="vue-modal-content">
         <h1>Add New Company:</h1>
-        <form @submit.prevent="submitForm()" class="form">
+        <div v-for="(v, k) in errors" :key="k" class="error">
+          <p v-for="error in v" :key="error">
+            {{ error }}
+          </p>
+        </div>
+        <form @submit.prevent="saveCompany()" class="form">
           <div class="fg form-firstname">
             <label for="name">Company Name:</label>
-            <input v-model="v$.form.name.$model" name="name" type="text" />
+            <input v-model="form.name" name="name" type="text" />
           </div>
           <div class="form-buttons">
-            <button
-              :disabled="v$.form.$invalid"
-              type="submit"
-              @click="submitForm()"
-            >
-              Submit
-            </button>
+            <button type="submit">Submit</button>
             <button type="button" @click="$emit('close')">Close</button>
           </div>
         </form>
@@ -25,38 +24,30 @@
 </template>
 
 <script>
-import useVuelidate from "@vuelidate/core";
-import { required, maxLength } from "@vuelidate/validators";
+import { reactive } from "vue";
+import useCompanies from "../services/companies";
 
 export default {
   name: "AddCompanyModal",
-  props: {
-    company: Object,
-  },
-  setup() {
-    return { v$: useVuelidate() };
-  },
-  data() {
-    return {
-      form: {
-        name: "",
-      },
+  setup(props, context) {
+    const form = reactive({
+      name: "",
+    });
+
+    const { errors, storeCompany } = useCompanies();
+
+    const saveCompany = async () => {
+      await storeCompany({ ...form });
+      if (errors.value === "") {
+        context.emit("close");
+      }
     };
-  },
-  validations() {
+
     return {
-      form: {
-        name: {
-          required,
-          mmaxLengthValueax: maxLength(500),
-        },
-      },
+      form,
+      errors,
+      saveCompany,
     };
-  },
-  methods: {
-    submitForm: function () {
-      console.log(this.form.name);
-    },
   },
 };
 </script>

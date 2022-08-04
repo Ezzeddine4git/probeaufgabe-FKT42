@@ -1,5 +1,4 @@
 <template>
-  <WidgetContainerModal />
   <div class="company__card">
     <div class="company__card__header" @click="toggleCompany()">
       <h4>{{ company.name }}</h4>
@@ -11,7 +10,7 @@
     <div :class="{ toggle: toggle }" class="company__card__employees">
       <div class="company__card__employees__header">
         <h4>Employees</h4>
-        <Button @click="openAddEmployeeModal()">Add Employee</Button>
+        <button @click="openAddEmployeeModal()">Add Employee</button>
       </div>
       <div
         v-for="employee in company.employees"
@@ -25,7 +24,7 @@
   </div>
   <AddEmployeeModal
     v-if="modalIsOpen"
-    @close="modalIsOpen = !modalIsOpen"
+    @close="modalClosed()"
     :company="company"
   />
 </template>
@@ -36,10 +35,16 @@ import { ref } from "vue";
 
 export default {
   name: "CompanyCard",
-  setup() {
+  emits: ["close"],
+  setup(props, context) {
     const modalIsOpen = ref(false);
 
-    return { modalIsOpen };
+    const modalClosed = () => {
+      modalIsOpen.value = !modalIsOpen.value;
+      context.emit("close");
+    };
+
+    return { modalIsOpen, modalClosed };
   },
   component: {
     AddEmployeeModal,

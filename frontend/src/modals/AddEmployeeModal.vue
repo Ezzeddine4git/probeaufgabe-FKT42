@@ -3,21 +3,26 @@
     <div class="vue-modal-inner">
       <div class="vue-modal-content">
         <h1>Add New Employee:</h1>
-        <form class="form">
+        <div v-for="(v, k) in errors" :key="k" class="error">
+          <p v-for="error in v" :key="error">
+            {{ error }}
+          </p>
+        </div>
+        <form @submit.prevent="saveEmployee()" class="form">
           <div class="fg form-firstname">
             <label for="firstname">Firstname:</label>
-            <input type="text" />
+            <input v-model="form.firstname" name="firstname" type="text" />
           </div>
           <div class="fg form-lastname">
             <label for="lastname">Lastname:</label>
-            <input type="text" />
+            <input v-model="form.lastname" name="lastname" type="text" />
           </div>
           <div class="fg form-email">
             <label for="email">E-Mail Adress:</label>
-            <input type="email" />
+            <input v-model="form.email" name="email" type="email" />
           </div>
           <div class="form-buttons">
-            <button type="submit" @click="$emit('close')">Submit</button>
+            <button type="submit">Submit</button>
             <button type="button" @click="$emit('close')">Close</button>
           </div>
         </form>
@@ -27,10 +32,36 @@
 </template>
 
 <script>
+import { reactive } from "vue";
+import useEmployees from "../services/employees";
+
 export default {
   name: "AddEmployeeModal",
   props: {
     company: Object,
+  },
+  setup(props, context) {
+    const form = reactive({
+      firstname: "",
+      lastname: "",
+      email: "",
+      company_id: props.company.id.toString(),
+    });
+
+    const { storeEmployee, errors } = useEmployees();
+
+    const saveEmployee = async () => {
+      await storeEmployee({ ...form });
+      if (errors.value === "") {
+        context.emit("close");
+      }
+    };
+
+    return {
+      form,
+      errors,
+      saveEmployee,
+    };
   },
 };
 </script>

@@ -10,7 +10,7 @@
   <div class="home">
     <div class="home__header">
       <h1>Companies Management</h1>
-      <Button @click="openAddCompanyModal()">Add Company</Button>
+      <button @click="openAddCompanyModal()">Add Company</button>
     </div>
     <div class="home__body">
       <div
@@ -18,21 +18,19 @@
         v-bind:key="company.id"
         class="home__body__company-card"
       >
-        <CompanyCard :company="company" />
+        <CompanyCard @close="modalClosed()" :company="company" />
       </div>
     </div>
-
-    <div class="home__bottom">
-      <Button> Load more</Button>
-    </div>
   </div>
-  <AddCompanyModal v-if="modalIsOpen" @close="modalIsOpen = !modalIsOpen" />
+  <AddCompanyModal v-if="modalIsOpen" @close="modalClosed()" />
 </template>
 
 <script>
 import CompanyCard from "./components/CompanyCard.vue";
 import AddCompanyModal from "@/modals/AddCompanyModal.vue";
 import { ref } from "vue";
+import useCompanies from "./services/companies";
+import { onMounted } from "vue";
 
 export default {
   name: "App",
@@ -40,15 +38,19 @@ export default {
     CompanyCard,
     AddCompanyModal,
   },
+  emits: ["close"],
   setup() {
     const modalIsOpen = ref(false);
 
-    return { modalIsOpen };
-  },
-  data() {
-    return {
-      companies: companies,
+    const { companies, getCompanies } = useCompanies();
+    onMounted(getCompanies);
+
+    const modalClosed = () => {
+      getCompanies();
+      modalIsOpen.value = false;
     };
+
+    return { modalIsOpen, companies, modalClosed };
   },
   methods: {
     openAddCompanyModal: function () {
@@ -56,49 +58,6 @@ export default {
     },
   },
 };
-
-const companies = [
-  {
-    id: "1",
-    name: "Company 1",
-    employees: [
-      {
-        id: "1",
-        company_id: "1",
-        firstname: "John",
-        lastname: "Doe",
-        email: "john.doe@gmail.com",
-      },
-      {
-        id: "2",
-        company_id: "1",
-        firstname: "John",
-        lastname: "Doe",
-        email: "john.doe@gmail.fr",
-      },
-    ],
-  },
-  {
-    id: "2",
-    name: "Company 2",
-    employees: [
-      {
-        id: "3",
-        company_id: "2",
-        firstname: "John",
-        lastname: "Doe",
-        email: "john.doe@gmail.de",
-      },
-      {
-        id: "4",
-        company_id: "2",
-        firstname: "John",
-        lastname: "Doe",
-        email: "john.doe@gmail.tn",
-      },
-    ],
-  },
-];
 </script>
 
 <style lang="scss">
@@ -195,6 +154,12 @@ button {
     display: flex;
     flex-direction: column;
     gap: 2rem;
+  }
+}
+
+.error {
+  & p {
+    color: red;
   }
 }
 </style>

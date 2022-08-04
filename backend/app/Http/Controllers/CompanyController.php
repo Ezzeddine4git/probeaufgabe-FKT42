@@ -9,7 +9,7 @@ class CompanyController extends Controller
 {
     public function get_all_companies_with_respective_employees()
     {
-        $companies = Company::with('employees')->get();
+        $companies = Company::with('employees')->orderBy('created_at', 'desc')->get();
 
         return response()->json($companies, 200);
     }
